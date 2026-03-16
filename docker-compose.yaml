@@ -114,6 +114,13 @@ services:
       - postiz-uploads:/uploads/
     ports:
       - "4007:5000"
+    # Add new entrypoint to patch the code responsible for Postiz Issue #1143
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        find /app -name "subdomain.management.js" -type f -exec sed -i "s/return url\.domain! ? '\.' + url\.domain! : url\.hostname!;/return url.hostname!;/g" {} \; && \
+        echo "✅ Cookie domain patch applied" && \
+        exec docker-entrypoint.sh sh -c "nginx && pnpm run pm2"
     networks:
       - postiz-network
       - temporal-network
