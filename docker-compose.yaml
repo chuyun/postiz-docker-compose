@@ -5,13 +5,13 @@ services:
     restart: always
     environment:
       # === Required Settings
-      MAIN_URL: 'http://${POSTIZ_HOST}:${POSTIZ_PORT}'
-      FRONTEND_URL: 'http://${POSTIZ_HOST}:${POSTIZ_PORT}'
-      NEXT_PUBLIC_BACKEND_URL: 'http://${POSTIZ_HOST}:${POSTIZ_PORT}/api'
+      MAIN_URL: 'https://${POSTIZ_HOST}'
+      FRONTEND_URL: 'https://${POSTIZ_HOST}'
+      NEXT_PUBLIC_BACKEND_URL: 'https://${POSTIZ_HOST}/api'
       JWT_SECRET: 'random string that is unique to every install - just type random characters here!'
       DATABASE_URL: 'postgresql://postiz-user:postiz-password@postiz-postgres:5432/postiz-db-local'
       REDIS_URL: 'redis://postiz-redis:6379'
-      BACKEND_INTERNAL_URL: 'http://${POSTIZ_HOST}:${BACKEND_INTERNAL_PORT}'
+      BACKEND_INTERNAL_URL: 'http://localhost:3000'
       TEMPORAL_ADDRESS: "temporal:7233"
       IS_GENERAL: 'true'
       DISABLE_REGISTRATION: 'false'
@@ -112,15 +112,8 @@ services:
     volumes:
       - postiz-config:/config/
       - postiz-uploads:/uploads/
-    ports:
-      - "4007:5000"
-    # Add new entrypoint to patch the code responsible for Postiz Issue #1143
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        find /app -name "subdomain.management.js" -type f -exec sed -i "s/return url\.domain! ? '\.' + url\.domain! : url\.hostname!;/return url.hostname!;/g" {} \; && \
-        echo "✅ Cookie domain patch applied" && \
-        exec docker-entrypoint.sh sh -c "nginx && pnpm run pm2"
+    # ports:
+    #   - "4007:5000"
     networks:
       - postiz-network
       - temporal-network
