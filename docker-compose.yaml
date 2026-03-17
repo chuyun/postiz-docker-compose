@@ -108,7 +108,9 @@ services:
       # LINK_DRIP_API_KEY: ""
       # LINK_DRIP_API_ENDPOINT: "https://api.linkdrip.com/v1/"
       # LINK_DRIP_SHORT_LINK_DOMAIN: "dripl.ink"
-
+    
+    env_file:
+      - .env
     volumes:
       - postiz-config:/config/
       - postiz-uploads:/uploads/
@@ -217,6 +219,8 @@ services:
       - ES_SEEDS=temporal-elasticsearch
       - ES_VERSION=v7
       - TEMPORAL_NAMESPACE=default
+    env_file:
+      - .env
     networks:
       - temporal-network
     volumes:
