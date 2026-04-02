@@ -1,18 +1,19 @@
 services:
   postiz:
     image: ghcr.io/blendduck/wooply-postiz-app:main
-    container_name: postiz
+    # container_name: postiz
+    pull_policy: always
     restart: always
     environment:
       # === Required Settings
       MAIN_URL: '${POSTIZ_HOST}'
       FRONTEND_URL: '${POSTIZ_HOST}'
       NEXT_PUBLIC_BACKEND_URL: '${POSTIZ_HOST}/api'
-      JWT_SECRET: 'random string that is unique to every install - just type random characters here!'
+      JWT_SECRET: '${JWT_SECRET}'
       DATABASE_URL: 'postgresql://postiz-user:postiz-password@postiz-postgres:5432/postiz-db-local'
       REDIS_URL: 'redis://postiz-redis:6379'
       BACKEND_INTERNAL_URL: 'http://localhost:3000'
-      TEMPORAL_ADDRESS: "temporal:7233"
+      TEMPORAL_ADDRESS: 'temporal:7233'
       IS_GENERAL: 'true'
       DISABLE_REGISTRATION: 'false'
       RUN_CRON: 'true'
@@ -34,35 +35,35 @@ services:
       # === Social Media API Settings
       X_API_KEY: '${X_API_KEY}'
       X_API_SECRET: '${X_API_SECRET}'
-      LINKEDIN_CLIENT_ID: ''
-      LINKEDIN_CLIENT_SECRET: ''
-      REDDIT_CLIENT_ID: ''
-      REDDIT_CLIENT_SECRET: ''
-      GITHUB_CLIENT_ID: ''
-      GITHUB_CLIENT_SECRET: ''
-      BEEHIIVE_API_KEY: ''
-      BEEHIIVE_PUBLICATION_ID: ''
-      THREADS_APP_ID: ''
-      THREADS_APP_SECRET: ''
-      FACEBOOK_APP_ID: ''
-      FACEBOOK_APP_SECRET: ''
-      YOUTUBE_CLIENT_ID: ''
-      YOUTUBE_CLIENT_SECRET: ''
-      TIKTOK_CLIENT_ID: ''
-      TIKTOK_CLIENT_SECRET: ''
-      PINTEREST_CLIENT_ID: ''
-      PINTEREST_CLIENT_SECRET: ''
-      DRIBBBLE_CLIENT_ID: ''
-      DRIBBBLE_CLIENT_SECRET: ''
-      DISCORD_CLIENT_ID: ''
-      DISCORD_CLIENT_SECRET: ''
-      DISCORD_BOT_TOKEN_ID: ''
-      SLACK_ID: ''
-      SLACK_SECRET: ''
-      SLACK_SIGNING_SECRET: ''
+      LINKEDIN_CLIENT_ID: '${LINKEDIN_CLIENT_ID:-}'
+      LINKEDIN_CLIENT_SECRET: '${LINKEDIN_CLIENT_SECRET:-}'
+      REDDIT_CLIENT_ID: '${REDDIT_CLIENT_ID:-}'
+      REDDIT_CLIENT_SECRET: '${REDDIT_CLIENT_SECRET:-}'
+      GITHUB_CLIENT_ID: '${GITHUB_CLIENT_ID:-}'
+      GITHUB_CLIENT_SECRET: '${GITHUB_CLIENT_SECRET:-}'
+      BEEHIIVE_API_KEY: '${BEEHIIVE_API_KEY:-}'
+      BEEHIIVE_PUBLICATION_ID: '${BEEHIIVE_PUBLICATION_ID:-}'
+      THREADS_APP_ID: '${THREADS_APP_ID:-}'
+      THREADS_APP_SECRET: '${THREADS_APP_SECRET:-}'
+      FACEBOOK_APP_ID: '${FACEBOOK_APP_ID:-}'
+      FACEBOOK_APP_SECRET: '${FACEBOOK_APP_SECRET:-}'
+      YOUTUBE_CLIENT_ID: '${YOUTUBE_CLIENT_ID:-}'
+      YOUTUBE_CLIENT_SECRET: '${YOUTUBE_CLIENT_SECRET:-}'
+      TIKTOK_CLIENT_ID: '${TIKTOK_CLIENT_ID:-}'
+      TIKTOK_CLIENT_SECRET: '${TIKTOK_CLIENT_SECRET:-}'
+      PINTEREST_CLIENT_ID: '${PINTEREST_CLIENT_ID:-}'
+      PINTEREST_CLIENT_SECRET: '${PINTEREST_CLIENT_SECRET:-}'
+      DRIBBBLE_CLIENT_ID: '${DRIBBBLE_CLIENT_ID:-}'
+      DRIBBBLE_CLIENT_SECRET: '${DRIBBBLE_CLIENT_SECRET:-}'
+      DISCORD_CLIENT_ID: '${DISCORD_CLIENT_ID:-}'
+      DISCORD_CLIENT_SECRET: '${DISCORD_CLIENT_SECRET:-}'
+      DISCORD_BOT_TOKEN_ID: '${DISCORD_BOT_TOKEN_ID:-}'
+      SLACK_ID: '${SLACK_ID:-}'
+      SLACK_SECRET: '${SLACK_SECRET:-}'
+      SLACK_SIGNING_SECRET: '${SLACK_SIGNING_SECRET:-}'
       MASTODON_URL: 'https://mastodon.social'
-      MASTODON_CLIENT_ID: ''
-      MASTODON_CLIENT_SECRET: ''
+      MASTODON_CLIENT_ID: '${MASTODON_CLIENT_ID}'
+      MASTODON_CLIENT_SECRET: '${MASTODON_CLIENT_SECRET}'
 
       # === OAuth & Authentik Settings
       # NEXT_PUBLIC_POSTIZ_OAUTH_DISPLAY_NAME: 'Authentik'
@@ -82,17 +83,17 @@ services:
       # SENTRY_SPOTLIGHT: '1'
 
       # === Misc Settings
-      OPENAI_API_KEY: ''
-      NEXT_PUBLIC_DISCORD_SUPPORT: ''
-      NEXT_PUBLIC_POLOTNO: ''
+      OPENAI_API_KEY: '${OPENAI_API_KEY}'
+      NEXT_PUBLIC_DISCORD_SUPPORT: '${NEXT_PUBLIC_DISCORD_SUPPORT}'
+      NEXT_PUBLIC_POLOTNO: '${NEXT_PUBLIC_POLOTNO}'
       API_LIMIT: 30
 
       # === Payment / Stripe Settings
       FEE_AMOUNT: 0.05
-      STRIPE_PUBLISHABLE_KEY: ''
-      STRIPE_SECRET_KEY: ''
-      STRIPE_SIGNING_KEY: ''
-      STRIPE_SIGNING_KEY_CONNECT: ''
+      STRIPE_PUBLISHABLE_KEY: '${STRIPE_PUBLISHABLE_KEY}'
+      STRIPE_SECRET_KEY: '${STRIPE_SECRET_KEY}'
+      STRIPE_SIGNING_KEY: '${STRIPE_SIGNING_KEY}'
+      STRIPE_SIGNING_KEY_CONNECT: '${STRIPE_SIGNING_KEY_CONNECT}'
 
       # === Developer Settings
       NX_ADD_PLUGINS: false
@@ -108,6 +109,10 @@ services:
       # LINK_DRIP_API_KEY: ""
       # LINK_DRIP_API_ENDPOINT: "https://api.linkdrip.com/v1/"
       # LINK_DRIP_SHORT_LINK_DOMAIN: "dripl.ink"
+
+      # 如果你要启用 Spotlight，可取消下面两行注释
+      # NEXT_PUBLIC_SENTRY_DSN: 'http://spotlight:8969/stream'
+      # SENTRY_SPOTLIGHT: '1'
 
     env_file:
       - .env
@@ -127,7 +132,7 @@ services:
 
   postiz-postgres:
     image: postgres:17-alpine
-    container_name: postiz-postgres
+#    container_name: postiz-postgres
     restart: always
     environment:
       POSTGRES_PASSWORD: postiz-password
@@ -138,16 +143,17 @@ services:
     networks:
       - postiz-network
     healthcheck:
-      test: pg_isready -U postiz-user -d postiz-db-local
+      test: ["CMD-SHELL", "pg_isready -U postiz-user -d postiz-db-local"]
       interval: 10s
       timeout: 3s
       retries: 3
+
   postiz-redis:
     image: redis:7.2
-    container_name: postiz-redis
+#    container_name: postiz-redis
     restart: always
     healthcheck:
-      test: redis-cli ping
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -158,11 +164,11 @@ services:
 
   # For Application Monitoring / Debugging
   spotlight:
-    pull_policy: always
-    container_name: spotlight
-    ports:
-      - 8969:8969/tcp
     image: ghcr.io/getsentry/spotlight:latest
+    pull_policy: always
+    restart: always
+    expose:
+      - "8969"
     networks:
       - postiz-network
 
@@ -170,8 +176,9 @@ services:
   # Temporal Stack
   # -----------------------
   temporal-elasticsearch:
-    container_name: temporal-elasticsearch
+#    container_name: temporal-elasticsearch
     image: elasticsearch:7.17.27
+    restart: always
     environment:
       - cluster.routing.allocation.disk.threshold_enabled=true
       - cluster.routing.allocation.disk.watermark.low=512mb
@@ -183,28 +190,30 @@ services:
     networks:
       - temporal-network
     expose:
-      - 9200
+      - "9200"
     volumes:
-      - /var/lib/elasticsearch/data
+      - temporal-elasticsearch-data:/usr/share/elasticsearch/data
 
   temporal-postgresql:
-    container_name: temporal-postgresql
+#    container_name: temporal-postgresql
     image: postgres:16
+    restart: always
     environment:
       POSTGRES_PASSWORD: temporal
       POSTGRES_USER: temporal
+    expose:
+      - "5432"
+    volumes:
+      - temporal-postgres-data:/var/lib/postgresql/data
     networks:
       - temporal-network
-    expose:
-      - 5432
-    volumes:
-      - /var/lib/postgresql/data
 
   temporal:
-    container_name: temporal
-    ports:
-      - '7233:7233'
+#    container_name: temporal
+#    ports:
+#      - '7233:7233'
     image: temporalio/auto-setup:1.28.1
+    restart: always
     depends_on:
       - temporal-postgresql
       - temporal-elasticsearch
@@ -221,6 +230,8 @@ services:
       - TEMPORAL_NAMESPACE=default
     env_file:
       - .env
+    expose:
+      - "7233"
     networks:
       - temporal-network
     volumes:
@@ -229,8 +240,9 @@ services:
       kompose.volume.type: configMap
 
   temporal-admin-tools:
-    container_name: temporal-admin-tools
+#    container_name: temporal-admin-tools
     image: temporalio/admin-tools:1.28.1-tctl-1.18.4-cli-1.4.1
+    restart: always
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
       - TEMPORAL_CLI_ADDRESS=temporal:7233
@@ -242,15 +254,18 @@ services:
     tty: true
 
   temporal-ui:
-    container_name: temporal-ui
+#    container_name: temporal-ui
     image: temporalio/ui:2.34.0
+    restart: always
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://127.0.0.1:3000
+      - TEMPORAL_CORS_ORIGINS='${POSTIZ_HOST}'
+    expose:
+      - "8080"
     networks:
       - temporal-network
-    ports:
-      - '8080:8080'
+#    ports:
+#      - '8080:8080'
 
 volumes:
   postgres-volume:
@@ -263,11 +278,11 @@ volumes:
     external: false
 
   postiz-uploads:
-    external: false
+  temporal-elasticsearch-data:
+  temporal-postgres-data:
 
 networks:
   postiz-network:
-    external: false
+    driver: bridge
   temporal-network:
     driver: bridge
-    name: temporal-network
